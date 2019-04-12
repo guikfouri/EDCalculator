@@ -202,40 +202,20 @@ char * infix_to_posfix(char * entrada){
     while(entrada[i] != '\0'){
         printf("Entrada: %c\n", entrada[i]);
         if(entrada[i] == '+' || entrada[i] == '-'){
-            if(!EstaVazia(pilha_posf)){
-                if(pilha_posf->fim->dado == '(' || pilha_posf->fim->dado == ')'){
-                    printf("Empilhou %c\n", entrada[i]);
-                    empilhar(pilha_posf, entrada[i]);
-                }
-                else{
-                    entrada_pos[j] = desempilhar(pilha_posf);
-                    j++;
-                    printf("Empilhou %c\n", entrada[i]);
-                    empilhar(pilha_posf, entrada[i]);
-                }
+            while(!EstaVazia(pilha_posf) && (pilha_posf->fim->dado != '(' && pilha_posf->fim->dado != ')')){ //Enquanto tiver coisa na pilha e houver um operador não parentesis
+                entrada_pos[j] = desempilhar(pilha_posf);
+                j++;
             }
-            else{
-                printf("Empilhou %c\n", entrada[i]);
-                empilhar(pilha_posf, entrada[i]);
-            }
+            printf("Empilhou %c\n", entrada[i]);
+            empilhar(pilha_posf, entrada[i]);
         }
         else if(entrada[i] == '*' || entrada[i] == '/'){
-            if(!EstaVazia(pilha_posf)){
-                if(pilha_posf->fim->dado == '*' || pilha_posf->fim->dado == '/'){
-                    entrada_pos[j] = desempilhar(pilha_posf);
-                    j++;
-                    printf("Empilhou %c\n", entrada[i]);
-                    empilhar(pilha_posf, entrada[i]);
-                }
-                else{
-                    printf("Empilhou %c\n", entrada[i]);
-                    empilhar(pilha_posf, entrada[i]);
-                }
+            while(!EstaVazia(pilha_posf) && (pilha_posf->fim->dado == '*' || pilha_posf->fim->dado == '/')){ //Desempilha todos * /
+                entrada_pos[j] = desempilhar(pilha_posf);
+                j++;
             }
-            else{
-                printf("Empilhou %c\n", entrada[i]);
-                empilhar(pilha_posf, entrada[i]);
-            }
+            printf("Empilhou %c\n", entrada[i]);
+            empilhar(pilha_posf, entrada[i]);
         }
         else if(entrada[i] == '('){
             printf("Empilhou %c\n", entrada[i]);
@@ -275,12 +255,21 @@ int avaliar_express(char * saida){
     t_lista * pilha_avaliar = (t_lista *)malloc(sizeof(t_lista));
     int i = 0;
     int valor1, valor2, resultado;
+    int aux;
 
+    while (saida[i] != '\0'){
+        aux = saida[i];
+        if(aux < 58 && aux > 47){
+            aux -= 48;
+            saida[i] = (char)aux;
+        }
+        i++;
+    } 
+    i = 0;
     while(saida[i] != '\0'){
         if(saida[i] == '+' || saida[i] == '-' || saida[i] == '*' || saida[i] == '/'){
-            valor1 = (int)desempilhar(pilha_avaliar);
-            valor2 = (int)desempilhar(pilha_avaliar);
-            printf("Desempilhou: %d %d\n", valor1, valor2);
+            valor1 = desempilhar(pilha_avaliar);
+            valor2 = desempilhar(pilha_avaliar);
             if(saida[i] == '+'){
                 resultado = valor1 + valor2;
                 printf("%d\n", resultado);
@@ -297,11 +286,9 @@ int avaliar_express(char * saida){
                 resultado = valor2/valor1;
                 printf("%d\n", resultado);
             }
-            printf("Empilhou: %d\n", resultado);
             empilhar(pilha_avaliar, resultado);
         }
         else{
-            printf("Empilhou: %c\n", saida[i]);
             empilhar(pilha_avaliar, saida[i]);
         }   
         i++;
