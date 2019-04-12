@@ -44,7 +44,7 @@ char RetirarDoInicio(t_lista * l){
         return dado_ret;
     }
     else{
-        printf("Lista já está vazia");
+        printf("Lista já está vazia\n");
         return 'e';
     }
 }
@@ -83,7 +83,7 @@ char RetirarDoFim(t_lista * l){
         }
     }
     else{
-        printf("Lista já está vazia");
+        printf("Lista já está vazia\n");
         return 'e';
     }
 }
@@ -143,7 +143,7 @@ int remover(int pos, t_lista * l){
         }
     }
     else{
-        printf("Lisa já está vazia");
+        printf("Lisa já está vazia\n");
         return 'e';
     }
 }
@@ -277,30 +277,38 @@ int avaliar_express(char * saida){
     int valor1, valor2, resultado;
 
     while(saida[i] != '\0'){
-        if(saida[i] == '+' || saida[i] == '-' || saida[i] == '+' || saida[i] == '/'){
+        if(saida[i] == '+' || saida[i] == '-' || saida[i] == '*' || saida[i] == '/'){
             valor1 = (int)desempilhar(pilha_avaliar);
             valor2 = (int)desempilhar(pilha_avaliar);
+            printf("Desempilhou: %d %d\n", valor1, valor2);
             if(saida[i] == '+'){
                 resultado = valor1 + valor2;
+                printf("%d\n", resultado);
             }
             else if(saida[i] == '-'){
                 resultado = valor2 - valor1;
+                printf("%d\n", resultado);
             }
             else if(saida[i] == '*'){
                 resultado = valor1 * valor2;
+                printf("%d\n", resultado);
             }
             else{
                 resultado = valor2/valor1;
+                printf("%d\n", resultado);
             }
+            printf("Empilhou: %d\n", resultado);
             empilhar(pilha_avaliar, resultado);
         }
         else{
+            printf("Empilhou: %c\n", saida[i]);
             empilhar(pilha_avaliar, saida[i]);
-        }
+        }   
         i++;
     }
+    resultado = desempilhar(pilha_avaliar);
     free(pilha_avaliar);
-    return desempilhar(pilha_avaliar);
+    return resultado;
 }
 
 int main(void){
