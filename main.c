@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+//Dominando essa parada;
+
 typedef struct elemento{
     struct elemento * prox;
     char dado;
