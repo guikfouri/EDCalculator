@@ -31,7 +31,6 @@ void InserirNoInicio(t_lista * l, char new){
         l->inicio = novo;
         l->fim = novo;
     }
-    free(novo);
 }
 
 char RetirarDoInicio(t_lista * l){
@@ -61,7 +60,6 @@ void InserirNoFim(t_lista * l, char new){
         l->inicio = novo;
     }
     l->fim = novo;
-    free(novo);
 }    
 
 char RetirarDoFim(t_lista * l){
@@ -81,7 +79,6 @@ char RetirarDoFim(t_lista * l){
             dado_ret = l->fim->dado;
             l->fim = penultimo;     //Novo fim
             l->fim->prox = NULL;
-            free(penultimo);
             return dado_ret;
         }
     }
@@ -109,7 +106,6 @@ void Inserir(t_lista * l, int pos, char new){
             novo->dado = new;
             novo->prox = atual->prox;
             atual->prox = novo;
-            free(novo);
         }
     }
     
@@ -161,18 +157,11 @@ char desempilhar(t_lista * p){
 }
 
 void na_pilha(t_lista * p){
-    t_lista * pilha_aux = (t_lista *)malloc(sizeof(t_lista));
-    char aux;
-    printf("%p %p", p->inicio, p->fim);
-    while(!EstaVazia(p)){
-        aux = desempilhar(p);
-    //    empilhar(pilha_aux, aux);
-        printf("%c ", aux);
+    t_elemento * pont_aux = p->inicio;
+    while(pont_aux != NULL){
+        printf("%c ", pont_aux->dado);
+        pont_aux = pont_aux->prox;
     }
-    //while(!EstaVazia(pilha_aux)){
-    //    aux = desempilhar(pilha_aux);
-    //    empilhar(p, aux);
-    //}
     printf("\n");
 }
 
@@ -208,12 +197,12 @@ int validar_express(char * entrada){
 char * infix_to_posfix(char * entrada){
     t_lista * pilha_posf = (t_lista *)malloc(sizeof(t_lista));
     char * entrada_pos = (char *)malloc(sizeof(1000));
+    char aux;
     int i = 0, j = 0;
     while(entrada[i] != '\0'){
         printf("Entrada: %c\n", entrada[i]);
         if(entrada[i] == '+' || entrada[i] == '-'){
             if(!EstaVazia(pilha_posf)){
-                printf("%c", pilha_posf->fim->dado);
                 if(pilha_posf->fim->dado == '(' || pilha_posf->fim->dado == ')'){
                     printf("Empilhou %c\n", entrada[i]);
                     empilhar(pilha_posf, entrada[i]);
@@ -253,11 +242,15 @@ char * infix_to_posfix(char * entrada){
             empilhar(pilha_posf, entrada[i]);
         }
         else if(entrada[i] == ')'){
-            while(desempilhar(pilha_posf) != '('){
-                printf("EH AQUIIIIIIII???????\n\n");
-                entrada_pos[j] = desempilhar(pilha_posf);
+            aux = pilha_posf->fim->dado;
+            while(aux != '('){
+                aux = desempilhar(pilha_posf);
+                printf("Desempilhou: %c\n", aux);
+                entrada_pos[j] = aux;
                 j++;
             }
+            j--;
+            entrada_pos[j] = '\0';
         }
         else{
             entrada_pos[j] = entrada[i];
@@ -314,30 +307,9 @@ int main(void){
     char entrada[1000];
     char * saida;
     int resultado;
-    t_lista * pilha_avaliar = (t_lista *)malloc(sizeof(t_lista));
-    InserirNoFim(pilha_avaliar, '1');
-    InserirNoInicio(pilha_avaliar, '2');
-    InserirNoFim(pilha_avaliar, '3');
-
-    empilhar(pilha_avaliar, '(');
-    na_pilha(pilha_avaliar);
-    empilhar(pilha_avaliar, '-');
-    na_pilha(pilha_avaliar);
-    desempilhar(pilha_avaliar);
-    na_pilha(pilha_avaliar);
-    desempilhar(pilha_avaliar);
-    na_pilha(pilha_avaliar);
-    empilhar(pilha_avaliar, '*');
-    na_pilha(pilha_avaliar);
-    desempilhar(pilha_avaliar);
-    na_pilha(pilha_avaliar);
-
-
     scanf("%s", entrada);
 
-
     if(validar_express(entrada)){
-        printf("SInal");
         saida = infix_to_posfix(entrada);
         printf("%s\n", saida);
         resultado = avaliar_express(saida);
