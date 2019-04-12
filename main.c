@@ -31,6 +31,7 @@ void InserirNoInicio(t_lista * l, char new){
         l->inicio = novo;
         l->fim = novo;
     }
+    free(novo);
 }
 
 char RetirarDoInicio(t_lista * l){
@@ -60,6 +61,7 @@ void InserirNoFim(t_lista * l, char new){
         l->inicio = novo;
     }
     l->fim = novo;
+    free(novo);
 }    
 
 char RetirarDoFim(t_lista * l){
@@ -107,8 +109,10 @@ void Inserir(t_lista * l, int pos, char new){
             novo->dado = new;
             novo->prox = atual->prox;
             atual->prox = novo;
+            free(novo);
         }
     }
+    
 }
 
 int remover(int pos, t_lista * l){
@@ -156,6 +160,22 @@ char desempilhar(t_lista * p){
     return RetirarDoFim(p);
 }
 
+void na_pilha(t_lista * p){
+    t_lista * pilha_aux = (t_lista *)malloc(sizeof(t_lista));
+    char aux;
+    printf("%p %p", p->inicio, p->fim);
+    while(!EstaVazia(p)){
+        aux = desempilhar(p);
+    //    empilhar(pilha_aux, aux);
+        printf("%c ", aux);
+    }
+    //while(!EstaVazia(pilha_aux)){
+    //    aux = desempilhar(pilha_aux);
+    //    empilhar(p, aux);
+    //}
+    printf("\n");
+}
+
 int validar_express(char * entrada){
     t_lista * pilha_validar = (t_lista *)malloc(sizeof(t_lista));
     int i = 0;
@@ -169,6 +189,7 @@ int validar_express(char * entrada){
                     desempilhar(pilha_validar);
                 }
                 else{
+                    free(pilha_validar);
                     return 0;
                 }
             }
@@ -189,17 +210,23 @@ char * infix_to_posfix(char * entrada){
     char * entrada_pos = (char *)malloc(sizeof(1000));
     int i = 0, j = 0;
     while(entrada[i] != '\0'){
+        printf("Entrada: %c\n", entrada[i]);
         if(entrada[i] == '+' || entrada[i] == '-'){
             if(!EstaVazia(pilha_posf)){
-                if(pilha_posf->fim->dado != '(' || pilha_posf->fim->dado != ')'){
-                    entrada_pos[j] = desempilhar(pilha_posf);
-                    j++;
+                printf("%c", pilha_posf->fim->dado);
+                if(pilha_posf->fim->dado == '(' || pilha_posf->fim->dado == ')'){
+                    printf("Empilhou %c\n", entrada[i]);
+                    empilhar(pilha_posf, entrada[i]);
                 }
                 else{
+                    entrada_pos[j] = desempilhar(pilha_posf);
+                    j++;
+                    printf("Empilhou %c\n", entrada[i]);
                     empilhar(pilha_posf, entrada[i]);
                 }
             }
             else{
+                printf("Empilhou %c\n", entrada[i]);
                 empilhar(pilha_posf, entrada[i]);
             }
         }
@@ -208,21 +235,26 @@ char * infix_to_posfix(char * entrada){
                 if(pilha_posf->fim->dado == '*' || pilha_posf->fim->dado == '/'){
                     entrada_pos[j] = desempilhar(pilha_posf);
                     j++;
+                    printf("Empilhou %c\n", entrada[i]);
+                    empilhar(pilha_posf, entrada[i]);
                 }
                 else{
+                    printf("Empilhou %c\n", entrada[i]);
                     empilhar(pilha_posf, entrada[i]);
                 }
             }
             else{
+                printf("Empilhou %c\n", entrada[i]);
                 empilhar(pilha_posf, entrada[i]);
             }
         }
         else if(entrada[i] == '('){
+            printf("Empilhou %c\n", entrada[i]);
             empilhar(pilha_posf, entrada[i]);
         }
         else if(entrada[i] == ')'){
             while(desempilhar(pilha_posf) != '('){
-                printf("EH AQUIIIIIIII???????\n\n\n\n");
+                printf("EH AQUIIIIIIII???????\n\n");
                 entrada_pos[j] = desempilhar(pilha_posf);
                 j++;
             }
@@ -232,6 +264,10 @@ char * infix_to_posfix(char * entrada){
             j++;
         }
         i++;
+        printf("O que tem na pilha:");
+        na_pilha(pilha_posf);
+        printf("\n");
+        
     }
     while(!EstaVazia(pilha_posf)){
         entrada_pos[j] = desempilhar(pilha_posf);
@@ -270,6 +306,7 @@ int avaliar_express(char * saida){
         }
         i++;
     }
+    free(pilha_avaliar);
     return desempilhar(pilha_avaliar);
 }
 
@@ -277,9 +314,30 @@ int main(void){
     char entrada[1000];
     char * saida;
     int resultado;
+    t_lista * pilha_avaliar = (t_lista *)malloc(sizeof(t_lista));
+    InserirNoFim(pilha_avaliar, '1');
+    InserirNoInicio(pilha_avaliar, '2');
+    InserirNoFim(pilha_avaliar, '3');
+
+    empilhar(pilha_avaliar, '(');
+    na_pilha(pilha_avaliar);
+    empilhar(pilha_avaliar, '-');
+    na_pilha(pilha_avaliar);
+    desempilhar(pilha_avaliar);
+    na_pilha(pilha_avaliar);
+    desempilhar(pilha_avaliar);
+    na_pilha(pilha_avaliar);
+    empilhar(pilha_avaliar, '*');
+    na_pilha(pilha_avaliar);
+    desempilhar(pilha_avaliar);
+    na_pilha(pilha_avaliar);
+
+
     scanf("%s", entrada);
 
+
     if(validar_express(entrada)){
+        printf("SInal");
         saida = infix_to_posfix(entrada);
         printf("%s\n", saida);
         resultado = avaliar_express(saida);
