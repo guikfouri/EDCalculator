@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//Dominando essa parada;
-
 typedef struct elemento{
     struct elemento * prox;
-    char dado;
+    int dado_int;
+    char dado_char;
+    int flag;     //1 para int, 0 para char
 }t_elemento;
 
 typedef struct lista{
@@ -22,75 +22,71 @@ int EstaVazia(t_lista * l){
     }
 }
 
-void InserirNoInicio(t_lista * l, char new){
-    t_elemento * novo = (t_elemento *)malloc(sizeof(t_elemento));
-    novo->dado = new;
-    novo->prox = l->inicio;  
+void InserirNoInicio(t_lista * l, t_elemento * new){
+    new->prox = l->inicio;  
     if (!EstaVazia(l)){
-        l->inicio = novo;
+        l->inicio = new;
     }
     else{
-        l->inicio = novo;
-        l->fim = novo;
+        l->inicio = new;
+        l->fim = new;
     }
 }
 
-char RetirarDoInicio(t_lista * l){
-    char dado_ret;
+t_elemento * RetirarDoInicioChar(t_lista * l){
+    t_elemento * dado;
     if (!EstaVazia(l)){
-        dado_ret = l->inicio->dado;
+        dado = l->inicio;
         l->inicio = l->inicio->prox;
         if (l->inicio == NULL){
             l->fim = NULL;
         }
-        return dado_ret;
+        return dado;
     }
     else{
         printf("Lista já está vazia\n");
-        return 'e';
+        return NULL;
     }
 }
 
-void InserirNoFim(t_lista * l, char new){
-    t_elemento * novo = (t_elemento *)malloc(sizeof(t_elemento));
-    novo->dado = new;
-    novo->prox = NULL;
+void InserirNoFim(t_lista * l, t_elemento * new){
+    new->prox = NULL;
     if(!EstaVazia(l)){
-        l->fim->prox = novo;
+        l->fim->prox = new;
     }
     else{
-        l->inicio = novo;
+        l->inicio = new;
     }
-    l->fim = novo;
+    l->fim = new;
 }    
 
-char RetirarDoFim(t_lista * l){
+t_elemento * RetirarDoFim(t_lista * l){
     if(!EstaVazia(l)){
-        char dado_ret;
+        t_elemento * dado;
         if(l->inicio == l->fim){ //Apenas 1 elemento
-            dado_ret = l->inicio->dado;
+            dado = l->inicio;
             l->inicio = NULL;
             l->fim = NULL;
-            return dado_ret;
+            return dado;
         }
         else{
             t_elemento * penultimo = l->inicio;
             while(penultimo->prox != l->fim){
                 penultimo = penultimo->prox;
             }
-            dado_ret = l->fim->dado;
+            dado = l->fim;
             l->fim = penultimo;     //Novo fim
             l->fim->prox = NULL;
-            return dado_ret;
+            return dado;
         }
     }
     else{
         printf("Lista já está vazia\n");
-        return 'e';
+        return NULL;
     }
 }
 
-void Inserir(t_lista * l, int pos, char new){
+void Inserir(t_lista * l, int pos, t_elemento * new){
     if (pos <= 0){
         InserirNoInicio(l, new);
     }
@@ -104,21 +100,18 @@ void Inserir(t_lista * l, int pos, char new){
             InserirNoFim(l, new);
         }
         else{
-            t_elemento * novo = (t_elemento *)malloc(sizeof(t_elemento));
-            novo->dado = new;
-            novo->prox = atual->prox;
-            atual->prox = novo;
+            new->prox = atual->prox;
+            atual->prox = new;
         }
     }
-    
 }
 
-int remover(int pos, t_lista * l){
+t_elemento * remover(int pos, t_lista * l){
     int i;
     if(!EstaVazia(l)){
-        char dado_ret;
+        t_elemento * dado_ret;
         if(l->inicio == l->fim){ //Apenas 1 elemento
-            dado_ret = l->inicio->dado;
+            dado_ret = l->inicio;
             l->inicio = NULL;
             l->fim = NULL;
             return dado_ret;
@@ -133,12 +126,12 @@ int remover(int pos, t_lista * l){
                 ant_removido = ant_removido->prox;
             }
             if(ant_removido->prox == NULL){
-                dado_ret = l->fim->dado;
+                dado_ret = l->fim;
                 l->fim = ant_removido;
                 return dado_ret;
             }
             else{
-                dado_ret = ant_removido->prox->dado;
+                dado_ret = ant_removido->prox;
                 ant_removido->prox = ant_removido->prox->prox;
                 return dado_ret;
             }
@@ -150,32 +143,38 @@ int remover(int pos, t_lista * l){
     }
 }
 
-void empilhar(t_lista * p, char new){
+void empilhar(t_lista * p, t_elemento * new){
     InserirNoFim(p , new);
 }
 
-char desempilhar(t_lista * p){
+t_elemento * desempilhar(t_lista * p){
     return RetirarDoFim(p);
 }
 
 void na_pilha(t_lista * p){
     t_elemento * pont_aux = p->inicio;
     while(pont_aux != NULL){
-        printf("%c ", pont_aux->dado);
-        pont_aux = pont_aux->prox;
+        if(pont_aux->flag == 0){
+            printf("%c ", pont_aux->dado_char);
+            pont_aux = pont_aux->prox;
+        }
+        else{
+            printf("%d ", pont_aux->dado_int);
+            pont_aux = pont_aux->prox;
+        }
     }
     printf("\n");
 }
 
-int validar_express(char * entrada){
+int validar_express(t_elemento * entrada){
     t_lista * pilha_validar = (t_lista *)malloc(sizeof(t_lista));
     int i = 0;
-    while(entrada[i] != '\0'){
-        if (entrada[i] == '('){
+    while(entrada[i]->dado_char != '\0'){
+        if (entrada[i]->dado_char == '('){
             empilhar(pilha_validar, '(');
         }
         else
-            if(entrada[i] == ')'){
+            if(entrada[i]->dado_char == ')'){
                 if(!EstaVazia(pilha_validar)){
                     desempilhar(pilha_validar);
                 }
@@ -196,108 +195,117 @@ int validar_express(char * entrada){
     }
 }
 
-char * infix_to_posfix(char * entrada){
+t_elemento * infix_to_posfix(t_elemento * entrada){
     t_lista * pilha_posf = (t_lista *)malloc(sizeof(t_lista));
-    char * entrada_pos = (char *)malloc(sizeof(1000));
-    char aux;
+    t_elemento * entrada_pos = (t_elemento *)malloc(sizeof(sizeof(t_elemento)*1000));
+    t_elemento * aux;
     int i = 0, j = 0;
-    while(entrada[i] != '\0'){
-        printf("Entrada: %c\n", entrada[i]);
-        if(entrada[i] == '+' || entrada[i] == '-'){
-            while(!EstaVazia(pilha_posf) && (pilha_posf->fim->dado != '(' && pilha_posf->fim->dado != ')')){ //Enquanto tiver coisa na pilha e houver um operador não parentesis
-                entrada_pos[j] = desempilhar(pilha_posf);
+    while(entrada[i]->dado_char != '\0'){
+        if(entrada[i]->flag == 0){
+            printf("Entrada: %c\n", entrada[i]);
+            if(entrada[i]->dado_char == '+' || entrada[i]->dado_char == '-'){
+                while(!EstaVazia(pilha_posf) && (pilha_posf->fim->dado_char != '(' && pilha_posf->fim->dado_char != ')')){ //Enquanto tiver coisa na pilha e houver um operador não parentesis
+                    entrada_pos[j] = desempilhar(pilha_posf);
+                    j++;
+                }
+                printf("Empilhou %c\n", entrada[i]->dado_char);
+                empilhar(pilha_posf, entrada[i]);
+            }
+            else if(entrada[i]->dado_char == '*' || entrada[i]->dado_char == '/'){
+                while(!EstaVazia(pilha_posf) && (pilha_posf->fim->dado_char == '*' || pilha_posf->fim->dado_char == '/')){ //Desempilha todos * /
+                    entrada_pos[j] = desempilhar(pilha_posf);
+                    j++;
+                }
+                printf("Empilhou %c\n", entrada[i]->dado_char);
+                empilhar(pilha_posf, entrada[i]);
+            }
+            else if(entrada[i]->dado_char == '('){
+                printf("Empilhou %c\n", entrada[i]->dado_char);
+                empilhar(pilha_posf, entrada[i]);
+            }
+            else if(entrada[i]->dado_char == ')'){
+                aux = pilha_posf->fim;
+                while(aux->dado_char != '('){
+                    aux = desempilhar(pilha_posf);
+                    printf("Desempilhou: %c\n", aux->dado_char);
+                    entrada_pos[j] = aux;
+                    j++;
+                }
+                j--;
+                entrada_pos[j]->dado_char = '\0';
+                entrada_pos[j]->flag = 0;
+            }
+            else{
+                entrada_pos[j] = entrada[i];
                 j++;
             }
-            printf("Empilhou %c\n", entrada[i]);
-            empilhar(pilha_posf, entrada[i]);
-        }
-        else if(entrada[i] == '*' || entrada[i] == '/'){
-            while(!EstaVazia(pilha_posf) && (pilha_posf->fim->dado == '*' || pilha_posf->fim->dado == '/')){ //Desempilha todos * /
-                entrada_pos[j] = desempilhar(pilha_posf);
-                j++;
-            }
-            printf("Empilhou %c\n", entrada[i]);
-            empilhar(pilha_posf, entrada[i]);
-        }
-        else if(entrada[i] == '('){
-            printf("Empilhou %c\n", entrada[i]);
-            empilhar(pilha_posf, entrada[i]);
-        }
-        else if(entrada[i] == ')'){
-            aux = pilha_posf->fim->dado;
-            while(aux != '('){
-                aux = desempilhar(pilha_posf);
-                printf("Desempilhou: %c\n", aux);
-                entrada_pos[j] = aux;
-                j++;
-            }
-            j--;
-            entrada_pos[j] = '\0';
+            i++;
+            printf("O que tem na pilha:");
+            na_pilha(pilha_posf);
+            printf("\n");
         }
         else{
             entrada_pos[j] = entrada[i];
             j++;
+            i++;
+            printf("O que tem na pilha:");
+            na_pilha(pilha_posf);
+            printf("\n");
         }
-        i++;
-        printf("O que tem na pilha:");
-        na_pilha(pilha_posf);
-        printf("\n");
-        
     }
     while(!EstaVazia(pilha_posf)){
         entrada_pos[j] = desempilhar(pilha_posf);
         j++;
     }
-    entrada_pos[j] = '\0';
+    entrada_pos[j]->dado_char = '\0';
+    entrada_pos[j]->flag = 0;
     free(pilha_posf);
     return entrada_pos;
 }
 
-int avaliar_express(char * saida){
+int avaliar_express(t_elemento * saida){
     t_lista * pilha_avaliar = (t_lista *)malloc(sizeof(t_lista));
     int i = 0;
-    int valor1, valor2, resultado;
+    t_elemento * valor1, valor2,
+    float resultado;
     int aux;
 
-    while (saida[i] != '\0'){
-        aux = saida[i];
-        if(aux < 58 && aux > 47){
-            aux -= 48;
-            saida[i] = (char)aux;
-        }
-        i++;
-    } 
     i = 0;
-    while(saida[i] != '\0'){
-        if(saida[i] == '+' || saida[i] == '-' || saida[i] == '*' || saida[i] == '/'){
+    while(saida[i]->dado_char != '\0'){
+        if(saida[i]->flag == 0){
             valor1 = desempilhar(pilha_avaliar);
             valor2 = desempilhar(pilha_avaliar);
-            if(saida[i] == '+'){
-                resultado = valor1 + valor2;
+            if(saida[i]->dado_char == '+'){
+                resultado = valor1->dado_int + valor2->dado_int;
                 printf("%d\n", resultado);
             }
-            else if(saida[i] == '-'){
-                resultado = valor2 - valor1;
+            else if(saida[i]->dado_char == '-'){
+                resultado = valor2->dado_int - valor1->dado_int;
                 printf("%d\n", resultado);
             }
-            else if(saida[i] == '*'){
-                resultado = valor1 * valor2;
+            else if(saida[i]->dado_char == '*'){
+                resultado = valor1->dado_int * valor2->dado_int;
                 printf("%d\n", resultado);
             }
             else{
-                resultado = valor2/valor1;
+                resultado = (float)valor2/valor1;
                 printf("%d\n", resultado);
             }
             empilhar(pilha_avaliar, resultado);
         }
-        else{
-            empilhar(pilha_avaliar, saida[i]);
-        }   
         i++;
+        else{
+                empilhar(pilha_avaliar, saida[i]);
+        }
     }
-    resultado = desempilhar(pilha_avaliar);
+    valor1 = desempilhar(pilha_avaliar);
+    resultado = valor1->dado_int;
     free(pilha_avaliar);
     return resultado;
+}
+
+t_elemento * tratar_entrada(char * entrada){
+    return entrada_nova;
 }
 
 int main(void){
