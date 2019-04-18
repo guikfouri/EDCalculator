@@ -206,13 +206,11 @@ t_elemento ** infix_to_posfix(t_elemento ** entrada, t_elemento ** entrada_pos){
     int i = 0, j = 0;
     while(entrada[i]->dado_char != '\0'){
         if(entrada[i]->flag == 0){
-            printf("Entrada: %c\n", entrada[i]->dado_char);
             if(entrada[i]->dado_char == '+' || entrada[i]->dado_char == '-'){
                 while(!EstaVazia(pilha_posf) && (pilha_posf->fim->dado_char != '(' && pilha_posf->fim->dado_char != ')')){ //Enquanto tiver coisa na pilha e houver um operador não parentesis
                     entrada_pos[j] = desempilhar(pilha_posf);
                     j++;
                 }
-                printf("Empilhou %c\n", entrada[i]->dado_char);
                 empilhar(pilha_posf, entrada[i]);
             }
             else if(entrada[i]->dado_char == '*' || entrada[i]->dado_char == '/'){
@@ -220,18 +218,15 @@ t_elemento ** infix_to_posfix(t_elemento ** entrada, t_elemento ** entrada_pos){
                     entrada_pos[j] = desempilhar(pilha_posf);
                     j++;
                 }
-                printf("Empilhou %c\n", entrada[i]->dado_char);
                 empilhar(pilha_posf, entrada[i]);
             }
             else if(entrada[i]->dado_char == '('){
-                printf("Empilhou %c\n", entrada[i]->dado_char);
                 empilhar(pilha_posf, entrada[i]);
             }
             else if(entrada[i]->dado_char == ')'){
                 aux = pilha_posf->fim;
                 while(aux->dado_char != '('){
                     aux = desempilhar(pilha_posf);
-                    printf("Desempilhou: %c\n", aux->dado_char);
                     entrada_pos[j] = aux;
                     j++;
                 }
@@ -244,17 +239,11 @@ t_elemento ** infix_to_posfix(t_elemento ** entrada, t_elemento ** entrada_pos){
                 j++;
             }
             i++;
-            printf("O que tem na pilha:");
-            na_pilha(pilha_posf);
-            printf("\n");
         }
         else{
-            printf("Entrada: %lf\n", entrada[i]->dado_int);
             entrada_pos[j] = entrada[i];
             j++;
             i++;
-            printf("O que tem na pilha:");
-            na_pilha(pilha_posf);
         }
     }
     while(!EstaVazia(pilha_posf)){
@@ -286,19 +275,15 @@ double avaliar_express(t_elemento ** saida){
             valor2 = desempilhar(pilha_avaliar);
             if(saida[i]->dado_char == '+'){
                 resultado->dado_int = valor1->dado_int + valor2->dado_int;
-                printf("%lf\n", resultado->dado_int);
             }
             else if(saida[i]->dado_char == '-'){
                 resultado->dado_int = valor2->dado_int - valor1->dado_int;
-                printf("%lf\n", resultado->dado_int);
             }
             else if(saida[i]->dado_char == '*'){
                 resultado->dado_int = valor1->dado_int * valor2->dado_int;
-                printf("%lf\n", resultado->dado_int);
             }
             else{
                 resultado->dado_int = (float)valor2->dado_int/valor1->dado_int;
-                printf("%lf\n", resultado->dado_int);
             }
             empilhar(pilha_avaliar, resultado);
         }
@@ -328,7 +313,6 @@ void tratar_entrada(char * entry, t_elemento **entrada_nova){
         novo->flag = 0; 
     }
     entrada_nova[i] = novo;
-    printf("%c %.0lf %d\n", entrada_nova[i]->dado_char, entrada_nova[i]->dado_int, entrada_nova[i]->flag);
     i++;  
     j++;
     while(entry[i] != '\0'){
@@ -336,8 +320,8 @@ void tratar_entrada(char * entry, t_elemento **entrada_nova){
         if ('0' <= entry[i] &&  entry[i] <= '9'){
             novo->dado_char = 'x';
             novo->flag = 1;
-            if (entrada_nova[j-1]->dado_int != -1){
-                novo->dado_int = (novo->dado_int)*10 + (entry[i] - '0');
+            if (entrada_nova[j-1]->flag == 1){
+                novo->dado_int = (entrada_nova[j-1]->dado_int)*10 + (entry[i] - '0');
                 j--;
             }
             else {
@@ -349,8 +333,7 @@ void tratar_entrada(char * entry, t_elemento **entrada_nova){
             novo->dado_int = -1;
             novo->flag = 0; 
         }
-        entrada_nova[i] = novo;
-        printf("%c %.0lf %d\n", entrada_nova[j]->dado_char, entrada_nova[j]->dado_int, entrada_nova[j]->flag); 
+        entrada_nova[j] = novo;
         i++;
         j++;
     }
@@ -358,7 +341,7 @@ void tratar_entrada(char * entry, t_elemento **entrada_nova){
     last->dado_char = '\0';
     last->dado_int = -1;
     last->flag = 0;
-    entrada_nova[i] = last;
+    entrada_nova[j] = last;
     return ;
 }
 
@@ -373,11 +356,13 @@ int main(void){
     
     if(validar_express(entrada_nova)){
         infix_to_posfix(entrada_nova, saida);//até aqui check
+        printf("\n");
         while(saida[i]->dado_char != '\0'){
             printf("%c %.0lf %d\n", saida[i]->dado_char, saida[i]->dado_int, saida[i]->flag); 
             i++;
         }
         resultado = avaliar_express(saida);
+        printf("\n");
         printf("Resultado da expressão: %lf\n", resultado);
     }
     else{
