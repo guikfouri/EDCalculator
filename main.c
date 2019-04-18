@@ -12,7 +12,7 @@ typedef struct lista{
     t_elemento * inicio;
     t_elemento * fim;
 }t_lista;
-/*
+
 int EstaVazia(t_lista * l){
     if (l->inicio == NULL){
         return 1;
@@ -249,20 +249,24 @@ t_elemento ** infix_to_posfix(t_elemento ** entrada, t_elemento ** entrada_pos){
             printf("\n");
         }
         else{
+            printf("Entrada: %lf\n", entrada[i]->dado_int);
             entrada_pos[j] = entrada[i];
             j++;
             i++;
             printf("O que tem na pilha:");
             na_pilha(pilha_posf);
-            printf("\n");
         }
     }
     while(!EstaVazia(pilha_posf)){
         entrada_pos[j] = desempilhar(pilha_posf);
         j++;
     }
-    entrada_pos[j]->dado_char = '\0';
-    entrada_pos[j]->flag = 0;
+
+    t_elemento * last = (t_elemento *)malloc(sizeof(t_elemento));
+    last->dado_char = '\0';
+    last->dado_int = -1;
+    last->flag = 0;
+    entrada_pos[j] = last;
     free(pilha_posf);
     return entrada_pos;
 }
@@ -307,11 +311,10 @@ double avaliar_express(t_elemento ** saida){
     resultado = desempilhar(pilha_avaliar);
     free(pilha_avaliar);
     return resultado->dado_int;
-}*/
+}
 
 void tratar_entrada(char * entry, t_elemento **entrada_nova){
-    t_elemento * novo = (t_elemento *)malloc(sizeof(sizeof(t_elemento)*1000));
-    //t_elemento * entrada_nova[1000] = (t_elemento *)malloc(sizeof(t_elemento));
+    t_elemento * novo = (t_elemento *)malloc(sizeof(t_elemento));
     int i = 0;
     int j = 0;
     if ('0' <= entry[i] &&  entry[i] <= '9'){
@@ -326,29 +329,36 @@ void tratar_entrada(char * entry, t_elemento **entrada_nova){
     }
     entrada_nova[i] = novo;
     printf("%c %.0lf %d\n", entrada_nova[i]->dado_char, entrada_nova[i]->dado_int, entrada_nova[i]->flag);
-    /*i++;  
+    i++;  
     j++;
     while(entry[i] != '\0'){
+        t_elemento * novo = (t_elemento *)malloc(sizeof(t_elemento));
         if ('0' <= entry[i] &&  entry[i] <= '9'){
-            entrada_nova[j]->dado_char = 'x';
-            entrada_nova[j]->flag = 1;
+            novo->dado_char = 'x';
+            novo->flag = 1;
             if (entrada_nova[j-1]->dado_int != -1){
-                entrada_nova[j-1]->dado_int = (entrada_nova[j-1]->dado_int)*10 + (entry[i] - '0');
+                novo->dado_int = (novo->dado_int)*10 + (entry[i] - '0');
                 j--;
             }
             else {
-                entrada_nova[j]->dado_int = entry[i] - '0';
+                novo->dado_int = entry[i] - '0';
             }
         }
         else{
-            entrada_nova[j]->dado_char = entry[i];
-            entrada_nova[j]->dado_int = -1;
-            entrada_nova[j]->flag = 0; 
+            novo->dado_char = entry[i];
+            novo->dado_int = -1;
+            novo->flag = 0; 
         }
+        entrada_nova[i] = novo;
         printf("%c %.0lf %d\n", entrada_nova[j]->dado_char, entrada_nova[j]->dado_int, entrada_nova[j]->flag); 
         i++;
         j++;
-    }*/
+    }
+    t_elemento * last = (t_elemento *)malloc(sizeof(t_elemento));
+    last->dado_char = '\0';
+    last->dado_int = -1;
+    last->flag = 0;
+    entrada_nova[i] = last;
     return ;
 }
 
@@ -356,18 +366,23 @@ int main(void){
     char entrada[100];
     t_elemento * entrada_nova[100];
     t_elemento * saida[100];
+    int i = 0;
     double resultado;
     scanf("%s", entrada);
     tratar_entrada(entrada, entrada_nova);
-
-    /*if(validar_express(entrada_nova)){
-        infix_to_posfix(entrada_nova, saida);
-        //printf("%s\n", saida);
+    
+    if(validar_express(entrada_nova)){
+        infix_to_posfix(entrada_nova, saida);//até aqui check
+        while(saida[i]->dado_char != '\0'){
+            printf("%c %.0lf %d\n", saida[i]->dado_char, saida[i]->dado_int, saida[i]->flag); 
+            i++;
+        }
         resultado = avaliar_express(saida);
         printf("Resultado da expressão: %lf\n", resultado);
     }
     else{
         printf("Expressão inválida\n");
-    }*/
+    
+    }
     return 0;
 }
