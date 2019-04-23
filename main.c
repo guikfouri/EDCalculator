@@ -201,7 +201,6 @@ int validar_express(t_elemento ** entrada){
 
 t_elemento ** infix_to_posfix(t_elemento ** entrada, t_elemento ** entrada_pos){
     t_lista * pilha_posf = (t_lista *)malloc(sizeof(t_lista));
-    //t_elemento ** entrada_pos = (t_elemento *)malloc(sizeof(sizeof(t_elemento)*1000));
     t_elemento * aux;
     int i = 0, j = 0;
     while(entrada[i]->dado_char != '\0'){
