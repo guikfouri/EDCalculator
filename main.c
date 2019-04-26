@@ -74,7 +74,6 @@ t_elemento * RetirarDoFim(t_lista * l){
             }
             dado = l->fim;
             l->fim = penultimo;  //O fim agora pertence ao penúltimo
-            free(l->fim->prox);  //Libera espaço na memória
             l->fim->prox = NULL; //o último se refere ao NULL
             return dado;
         }
@@ -357,8 +356,13 @@ int main(void){
     tratar_entrada(entrada, entrada_nova);
     
     if(validar_express(entrada_nova)){
+        while(entrada_nova[i]->dado_char != '\0'){
+            printf("%c %.0lf %d\n", entrada_nova[i]->dado_char, entrada_nova[i]->dado_int, entrada_nova[i]->flag); 
+            i++;
+        }
         infix_to_posfix(entrada_nova, saida);//até aqui check
         printf("\n");
+        i = 0;
         while(saida[i]->dado_char != '\0'){
             printf("%c %.0lf %d\n", saida[i]->dado_char, saida[i]->dado_int, saida[i]->flag); 
             i++;
@@ -369,7 +373,6 @@ int main(void){
     }
     else{
         printf("Expressão inválida\n");
-    
     }
     return 0;
 }
