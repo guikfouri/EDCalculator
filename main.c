@@ -17,12 +17,10 @@ int EstaVazia(t_lista * l){
     if (l->inicio == NULL){
         return 1;
     }
-    else{
         return 0;
-    }
 }
 
-void InserirNoInicio(t_lista * l, t_elemento * new){
+void InserirNoInicio(t_lista * l, t_elemento * new){ //ponteiro para o elemento como parâmetro.
     new->prox = l->inicio;  
     if (!EstaVazia(l)){
         l->inicio = new;
@@ -33,31 +31,31 @@ void InserirNoInicio(t_lista * l, t_elemento * new){
     }
 }
 
-t_elemento * RetirarDoInicio (t_lista * l){
-    t_elemento * dado;
+t_elemento * RetirarDoInicio (t_lista * l){ //retorna um ponteiro pra uma struct elemento.
+    t_elemento * dado; 
     if (!EstaVazia(l)){
         dado = l->inicio;
-        l->inicio = l->inicio->prox;
-        if (l->inicio == NULL){
-            l->fim = NULL;
+        l->inicio = l->inicio->prox; //muda o início para o próximo elemento da lista
+        if (l->inicio == NULL){ //só havia 1 elemento na lista
+            l->fim = NULL;      //após retirado, não tem mais nenhum
         }
-        return dado;
+        return dado;            //retorna a struct toda do elemento inicial
     }
     else{
         printf("Lista já está vazia\n");
-        return NULL;
+        return NULL; //retorna uma struct nula.
     }
 }
 
 void InserirNoFim(t_lista * l, t_elemento * new){
     new->prox = NULL;
     if(!EstaVazia(l)){
-        l->fim->prox = new;
+        l->fim->prox = new; //o último elemento passa a appontar para o novo.
     }
     else{
-        l->inicio = new;
+        l->inicio = new; //nesse caso, estamos inserindo o primeiro elemento da lista.
     }
-    l->fim = new;
+    l->fim = new; //em ambas as situações, new é o novo último.
 }    
 
 t_elemento * RetirarDoFim(t_lista * l){
@@ -67,16 +65,17 @@ t_elemento * RetirarDoFim(t_lista * l){
             dado = l->inicio;
             l->inicio = NULL;
             l->fim = NULL;
-            return dado;
+            return dado; //retorna o único elemento e torna a lista vazia
         }
-        else{
-            t_elemento * penultimo = l->inicio;
-            while(penultimo->prox != l->fim){
-                penultimo = penultimo->prox;
+        else{ //mais de 1 elemento
+            t_elemento * penultimo = l->inicio; //struct para percorrer a lista
+            while(penultimo->prox != l->fim){ //enquanto a struct de referência não for de fato a penúltima.
+                penultimo = penultimo->prox;  //percorre-se a lista.
             }
             dado = l->fim;
-            l->fim = penultimo;     //Novo fim
-            l->fim->prox = NULL;
+            l->fim = penultimo;  //O fim agora pertence ao penúltimo
+            free(l->fim->prox);  //Libera espaço na memória
+            l->fim->prox = NULL; //o último se refere ao NULL
             return dado;
         }
     }
@@ -91,17 +90,18 @@ void Inserir(t_lista * l, int pos, t_elemento * new){
         InserirNoInicio(l, new);
     }
     else{
-        t_elemento * atual = l->inicio;
+        t_elemento * atual = l->inicio; //ponteiro usado para percorrer a lista
         int i;
-        for(i = 0; i < (pos-1) && atual != NULL; i++){
+        for(i = 0; i < (pos-1) && atual != NULL; i++){ //até chegar na posição solicitada ou no fim da lista
             atual = atual->prox;
         }
-        if(atual == NULL || atual == l->fim){
+        if(atual == NULL || atual == l->fim){ 
+            //se atual é o último elemento ou até tentou ultrapassar o tamnho da lista
             InserirNoFim(l, new);
         }
         else{
-            new->prox = atual->prox;
-            atual->prox = new;
+            new->prox = atual->prox; //o novo elemento se refere ao próximo
+            atual->prox = new; //e o de referência se refere ao novo.
         }
     }
 }
@@ -121,12 +121,12 @@ t_elemento * remover(int pos, t_lista * l){
             return dado_ret;
         }
         else{
-            t_elemento * ant_removido = l->inicio;
-            for(i = 0; i < (pos-1) && ant_removido->prox != NULL; i++){
+            t_elemento * ant_removido = l->inicio; 
+            for(i = 0; i < (pos-1) && ant_removido->prox->prox != NULL; i++){
                 ant_removido = ant_removido->prox;
-            }
-            if(ant_removido->prox == NULL){
-                dado_ret = l->fim;
+            } //mesma estrutura de Inserir 
+            if(ant_removido->prox->prox == NULL){
+                dado_ret = l->fim; 
                 l->fim = ant_removido;
                 return dado_ret;
             }
@@ -270,6 +270,9 @@ double avaliar_express(t_elemento ** saida){
 
     while(saida[i]->dado_char != '\0'){
         if(saida[i]->flag == 0){
+            t_elemento * resultado = (t_elemento *)malloc(sizeof(t_lista));
+            resultado->dado_char = 'x';
+            resultado->flag = 1;
             valor1 = desempilhar(pilha_avaliar);
             valor2 = desempilhar(pilha_avaliar);
             if(saida[i]->dado_char == '+'){
