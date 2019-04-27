@@ -123,8 +123,9 @@ t_elemento * remover(int pos, t_lista * l){
             t_elemento * ant_removido = l->inicio; 
             for(i = 0; i < (pos-1) && ant_removido->prox->prox != NULL; i++){
                 ant_removido = ant_removido->prox;
-            } //mesma estrutura de Inserir 
-            if(ant_removido->prox->prox == NULL){
+            } //mesma estrutura de Inserir, porém nesse caso, o limite na lista
+              //é o penúltimo elemento
+            if(ant_removido->prox->prox == NULL){ //se o removido é o último elemento
                 dado_ret = l->fim; 
                 l->fim = ant_removido;
                 return dado_ret;
@@ -132,65 +133,67 @@ t_elemento * remover(int pos, t_lista * l){
             else{
                 dado_ret = ant_removido->prox;
                 ant_removido->prox = ant_removido->prox->prox;
-                return dado_ret;
+                return dado_ret; //retira o valor em questão da lista
             }
         }
     }
     else{
-        printf("Lisa já está vazia\n");
+        printf("Lista já está vazia\n");
         return NULL;
     }
 }
 
 void empilhar(t_lista * p, t_elemento * new){
-    InserirNoFim(p , new);
+    InserirNoFim(p , new); 
 }
 
 t_elemento * desempilhar(t_lista * p){
     return RetirarDoFim(p);
-}
+} //as duas última funções explicitam que a extremidade de 
+  //acesso para a pilha é o final da lista encadeada
+  //Complexidade O(n) !
 
 void na_pilha(t_lista * p){
-    t_elemento * pont_aux = p->inicio;
-    while(pont_aux != NULL){
-        if(pont_aux->flag == 0){
-            printf("%c ", pont_aux->dado_char);
-            pont_aux = pont_aux->prox;
+    t_elemento * pont_aux = p->inicio; //percorre a lista
+    while(pont_aux != NULL){ //enquanto não chegar no final
+        if(pont_aux->flag == 0){ //o elemento é um char
+            printf("%c ", pont_aux->dado_char); // imprime o char carregado
         }
-        else{
-            printf("%.1lf ", pont_aux->dado_int);
-            pont_aux = pont_aux->prox;
+        else{ //é um int
+            printf("%.1lf ", pont_aux->dado_int); //imprime o int carregado
         }
+        pont_aux = pont_aux->prox; //próximo ponteiro
     }
-    printf("\n");
+    printf("\n"); //ou seja, imprime todos os elementos da lista
 }
 
-int validar_express(t_elemento ** entrada){
-    t_lista * pilha_validar = (t_lista *)malloc(sizeof(t_lista));
-    t_elemento * parent = (t_elemento *)malloc(sizeof(t_elemento));
-    parent->dado_char = '(';
+int validar_express(t_elemento ** entrada){ //recebe como entrada um ponteiro que aponta para um ponteiro de uma struct
+                                            //entrada -> ponteiro da struct -> struct
+    t_lista * pilha_validar = (t_lista *)malloc(sizeof(t_lista)); //ponteiro para lista
+    t_elemento * parent = (t_elemento *)malloc(sizeof(t_elemento)); //ponteiro para elemento
+    parent->dado_char = '('; 
     parent->dado_int = -1;
-    parent->flag = 0;
+    parent->flag = 0; 
     int i = 0;
-    while(entrada[i]->dado_char != '\0'){
-        if (entrada[i]->dado_char == '('){
-            empilhar(pilha_validar, parent);
+    while(entrada[i]->dado_char != '\0'){ //enquanto o vetor de entradas não acabar
+        if (entrada[i]->dado_char == '('){ //se for encontrada uma prioridade
+            empilhar(pilha_validar, parent); //esta é empilhada
         }
         else
-            if(entrada[i]->dado_char == ')'){
+            if(entrada[i]->dado_char == ')'){ //para cada '('encontrado, deve ter um ')' para desempilhar
                 if(!EstaVazia(pilha_validar)){
                     desempilhar(pilha_validar);
                 }
-                else{
-                    free(pilha_validar);
-                    return 0;
+                else{ //se a pilha estuver vazia, significa que existe um '(' sem ')' correspondente
+                    free(pilha_validar); 
+                    return 0; //mostra que a entrada é inválida
                 }
             }
-        i++;
+        i++; //percorrendo toda a entrada
     }
-    if(EstaVazia(pilha_validar)){
+    if(EstaVazia(pilha_validar)){ //se após percorrer toda a entrada e não sobrarem parênteses
         free(pilha_validar);
-        return 1;
+        return 1; //é uma expressão válida para prioridade.
     }
     else{
         free(pilha_validar);
@@ -198,39 +201,44 @@ int validar_express(t_elemento ** entrada){
     }
 }
 
-t_elemento ** infix_to_posfix(t_elemento ** entrada, t_elemento ** entrada_pos){
+t_elemento ** infix_to_posfix(t_elemento ** entrada, t_elemento ** entrada_pos){ //essa função também retorna um ponteiro para um ponteiro de um elemento
     t_lista * pilha_posf = (t_lista *)malloc(sizeof(t_lista));
     t_elemento * aux;
     int i = 0, j = 0;
-    while(entrada[i]->dado_char != '\0'){
-        if(entrada[i]->flag == 0){
-            if(entrada[i]->dado_char == '+' || entrada[i]->dado_char == '-'){
-                while(!EstaVazia(pilha_posf) && (pilha_posf->fim->dado_char != '(' && pilha_posf->fim->dado_char != ')')){ //Enquanto tiver coisa na pilha e houver um operador não parentesis
-                    entrada_pos[j] = desempilhar(pilha_posf);
+    while(entrada[i]->dado_char != '\0'){ //enquanto a entrada não terminar
+        if(entrada[i]->flag == 0){ //se for um char
+            if(entrada[i]->dado_char == '+' || entrada[i]->dado_char == '-'){ //se foi encontrado um dos operadores de menor prioridade
+                while(!EstaVazia(pilha_posf) && (pilha_posf->fim->dado_char != '(' && pilha_posf->fim->dado_char != ')')){ 
+                    //Enquanto a pilha que guarda os operadores para execução não estiver vazia e o elemento mais externo não for parênteses
+                    entrada_pos[j] = desempilhar(pilha_posf); //retira o último operando e o coloca na versão pós-fixa da entrada
                     j++;
                 }
-                empilhar(pilha_posf, entrada[i]);
+                empilhar(pilha_posf, entrada[i]); //desempilhou todas as proridades antes de acrescentar o operando na pilha
             }
-            else if(entrada[i]->dado_char == '*' || entrada[i]->dado_char == '/'){
+            else if(entrada[i]->dado_char == '*' || entrada[i]->dado_char == '/'){ //operadores de maior prioridade
                 while(!EstaVazia(pilha_posf) && (pilha_posf->fim->dado_char == '*' || pilha_posf->fim->dado_char == '/')){ //Desempilha todos * /
                     entrada_pos[j] = desempilhar(pilha_posf);
                     j++;
-                }
+                } //desempilha todas as operações de mesma prioridade que já estão na pilha
                 empilhar(pilha_posf, entrada[i]);
             }
             else if(entrada[i]->dado_char == '('){
                 empilhar(pilha_posf, entrada[i]);
             }
-            else if(entrada[i]->dado_char == ')'){
-                aux = pilha_posf->fim;
-                while(aux->dado_char != '('){
+            else if(entrada[i]->dado_char == ')'){ 
+                aux = pilha_posf->fim; //aponta para o primeiro elemento da pilha
+                if (aux->dado_char == '('){
                     aux = desempilhar(pilha_posf);
-                    entrada_pos[j] = aux;
                     j++;
                 }
-                j--;
-                entrada_pos[j]->dado_char = '\0';
-                entrada_pos[j]->flag = 0;
+                while(aux->dado_char != '('){ //a pilha vai sendo esvaziada e passando o conteúdo para o aux
+                    aux = desempilhar(pilha_posf); //como '(' vai ser obtido pelo desempilhar, este será acrescentado na estrada_pos antes de sair do while
+                    entrada_pos[j] = aux;
+                    j++; 
+                }
+                j--; //como o '(' foi colocado indevidamente, a pos em entrada_pos é descrementado
+                entrada_pos[j]->dado_char = '\0'; //'(' é sobrescrito por '\0'
+                entrada_pos[j]->flag = 0; 
             }
             else{
                 entrada_pos[j] = entrada[i];
@@ -239,8 +247,8 @@ t_elemento ** infix_to_posfix(t_elemento ** entrada, t_elemento ** entrada_pos){
             i++;
         }
         else{
-            entrada_pos[j] = entrada[i];
-            j++;
+            entrada_pos[j] = entrada[i]; //se for operando, coloca direto na versão pós fixa.
+            j++; 
             i++;
         }
     }
@@ -253,7 +261,7 @@ t_elemento ** infix_to_posfix(t_elemento ** entrada, t_elemento ** entrada_pos){
     last->dado_char = '\0';
     last->dado_int = -1;
     last->flag = 0;
-    entrada_pos[j] = last;
+    entrada_pos[j] = last; //encerrando a entrada pós-fixa com o \0.
     free(pilha_posf);
     return entrada_pos;
 }
