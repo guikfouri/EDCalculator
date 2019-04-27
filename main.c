@@ -184,7 +184,7 @@ int validar_express(t_elemento ** entrada){ //recebe como entrada um ponteiro qu
                 if(!EstaVazia(pilha_validar)){
                     desempilhar(pilha_validar);
                 }
-                else{ //se a pilha estuver vazia, significa que existe um '(' sem ')' correspondente
+                else{ //se a pilha esti1ver vazia, significa que existe um '(' sem ')' correspondente
                     free(pilha_validar); 
                     return 0; //mostra que a entrada é inválida
                 }
@@ -254,35 +254,35 @@ t_elemento ** infix_to_posfix(t_elemento ** entrada, t_elemento ** entrada_pos){
     }
     while(!EstaVazia(pilha_posf)){
         entrada_pos[j] = desempilhar(pilha_posf);
-        j++;
-    }
+        j++; 
+    } //depois de ler toda a entrada, esvazia a pilha colocando todos os operandos na entrada_pos
 
     t_elemento * last = (t_elemento *)malloc(sizeof(t_elemento));
     last->dado_char = '\0';
     last->dado_int = -1;
     last->flag = 0;
     entrada_pos[j] = last; //encerrando a entrada pós-fixa com o \0.
-    free(pilha_posf);
+    free(pilha_posf); 
     return entrada_pos;
 }
 
 double avaliar_express(t_elemento ** saida){
-    t_lista * pilha_avaliar = (t_lista *)malloc(sizeof(t_lista));
-    t_elemento * resultado = (t_elemento *)malloc(sizeof(t_lista));
+    t_lista * pilha_avaliar = (t_lista *)malloc(sizeof(t_lista)); //pilha de avaliação
+    t_elemento * resultado = (t_elemento *)malloc(sizeof(t_elemento)); //ponteiro para struct
     int i = 0;
     t_elemento * valor1;
     t_elemento * valor2;
-    resultado->dado_char = 'x';
-    resultado->flag = 1;
+    resultado->dado_char = 'x'; //o char carregado é o 'x', para mostrar que é um número
+    resultado->flag = 1; //sinaliza que é um int
 
-    while(saida[i]->dado_char != '\0'){
-        if(saida[i]->flag == 0){
-            t_elemento * resultado = (t_elemento *)malloc(sizeof(t_lista));
+    while(saida[i]->dado_char != '\0'){ //enquanto a saída não terminar
+        if(saida[i]->flag == 0){ //se for um operador
+            t_elemento * resultado = (t_elemento *)malloc(sizeof(t_elemento));
             resultado->dado_char = 'x';
-            resultado->flag = 1;
+            resultado->flag = 1; //cria novamente a estrutura anterior
             valor1 = desempilhar(pilha_avaliar);
-            valor2 = desempilhar(pilha_avaliar);
-            if(saida[i]->dado_char == '+'){
+            valor2 = desempilhar(pilha_avaliar); //pega os dois últimos valores da pilha destinados para a operação
+            if(saida[i]->dado_char == '+'){ //avaliação individual para cada operador
                 resultado->dado_int = valor1->dado_int + valor2->dado_int;
             }
             else if(saida[i]->dado_char == '-'){
@@ -294,26 +294,26 @@ double avaliar_express(t_elemento ** saida){
             else{
                 resultado->dado_int = (float)valor2->dado_int/valor1->dado_int;
             }
-            empilhar(pilha_avaliar, resultado);
+            empilhar(pilha_avaliar, resultado); //o resultado da operação entra na pilha de operações
         }
         else{
-                empilhar(pilha_avaliar, saida[i]);
+            empilhar(pilha_avaliar, saida[i]); //se for número, só é destinado para pilha
         }
         i++;
 
     }
-    resultado = desempilhar(pilha_avaliar);
+    resultado = desempilhar(pilha_avaliar); //só terá apenas um valor
     free(pilha_avaliar);
     return resultado->dado_int;
 }
 
-void tratar_entrada(char * entry, t_elemento **entrada_nova){
+void tratar_entrada(char * entry, t_elemento ** entrada_nova){
     t_elemento * novo = (t_elemento *)malloc(sizeof(t_elemento));
     int i = 0;
     int j = 0;
-    if ('0' <= entry[i] &&  entry[i] <= '9'){
+    if ('0' <= entry[i] && entry[i] <= '9'){ //tratar números
         novo->dado_char = 'x';
-        novo->dado_int = entry[i] - '0';
+        novo->dado_int = entry[i] - '0'; //operação com chars, mas retorna um inteiro, já que as distâncias na tabela asc são correspondentes com a subtração
         novo->flag = 1; 
     }
     else{
@@ -321,17 +321,20 @@ void tratar_entrada(char * entry, t_elemento **entrada_nova){
         novo->dado_int = -1;
         novo->flag = 0; 
     }
-    entrada_nova[i] = novo;
+    entrada_nova[i] = novo; //realizada apenas para o primeiro elemento
     i++;  
     j++;
-    while(entry[i] != '\0'){
+    while(entry[i] != '\0'){ //trata os demais elementos até o fim da entrada
         t_elemento * novo = (t_elemento *)malloc(sizeof(t_elemento));
-        if ('0' <= entry[i] &&  entry[i] <= '9'){
+        if ('0' <= entry[i] && entry[i] <= '9'){
             novo->dado_char = 'x';
             novo->flag = 1;
-            if (entrada_nova[j-1]->flag == 1){
+            if (entrada_nova[j-1]->flag == 1){ //se o elemento da posição anterior da ent_nova for um inteiro, ou seja, trata-se de um número de mais de um algarismo
                 novo->dado_int = (entrada_nova[j-1]->dado_int)*10 + (entry[i] - '0');
-                j--;
+                //multiplica o int já existente em ent_nova por 10 (sendo 1 algarismo ou mais)
+                //adiciona com a entry atual
+                j--; //como no fim do escopo j é incrementado, o decremento serve para que o mesmo 
+                     //número de mais algarismos fique posicionado corretamente na ent_nova 
             }
             else {
                 novo->dado_int = entry[i] - '0';
@@ -342,7 +345,7 @@ void tratar_entrada(char * entry, t_elemento **entrada_nova){
             novo->dado_int = -1;
             novo->flag = 0; 
         }
-        entrada_nova[j] = novo;
+        entrada_nova[j] = novo; //acrescenta o elemento tratado
         i++;
         j++;
     }
@@ -351,24 +354,25 @@ void tratar_entrada(char * entry, t_elemento **entrada_nova){
     last->dado_int = -1;
     last->flag = 0;
     entrada_nova[j] = last;
-    return ;
+    return;
 }
 
 int main(void){
     char entrada[100];
-    t_elemento * entrada_nova[100];
-    t_elemento * saida[100];
+    t_elemento * entrada_nova[100]; //um vetor que guarda 100 ponteiros para 
+    t_elemento * saida[100]; //a operação está limitada à 100 caracteres
     int i = 0;
     double resultado;
     scanf("%s", entrada);
-    tratar_entrada(entrada, entrada_nova);
+    tratar_entrada(entrada, entrada_nova); //compacta números de mais algarismos, transforma números de char para inteiros
     
-    if(validar_express(entrada_nova)){
+    if(validar_express(entrada_nova)){ //condiciona a validade da expressão
+        printf("\n");
         while(entrada_nova[i]->dado_char != '\0'){
             printf("%c %.0lf %d\n", entrada_nova[i]->dado_char, entrada_nova[i]->dado_int, entrada_nova[i]->flag); 
-            i++;
+            i++; 
         }
-        infix_to_posfix(entrada_nova, saida);//até aqui check
+        infix_to_posfix(entrada_nova, saida); //saída recebe a versão pós-fixa da entrada
         printf("\n");
         i = 0;
         while(saida[i]->dado_char != '\0'){
